@@ -93,8 +93,6 @@ public class FlightRadarCollectorThread implements Runnable {
                 	double alt = frAircraft.getDouble(4) * 0.3048;
                 	double heading = frAircraft.getDouble(3);
                 	
-                	System.out.println( arID );
-                	
             		// Para cada aeronave encontrada
             		FlightRadarAircraft ac = new FlightRadarAircraft( manager );
             		// Preenche os atributos da aeronave com os dados do FlightRadar24
