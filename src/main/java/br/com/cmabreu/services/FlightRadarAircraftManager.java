@@ -36,18 +36,18 @@ public class FlightRadarAircraftManager {
 	}
 	
 	public static void startInstance( RTIambassador rtiAmb ) throws Exception {
-		new FlightRadarAircraftManager( rtiAmb );
+		instance = new FlightRadarAircraftManager( rtiAmb );
 	}
 	
 	private FlightRadarAircraftManager( RTIambassador rtiAmb ) throws Exception {
 		logger.info("FlightRadar Aircraft Manager ativo");
 		this.rtiAmb = rtiAmb;
 		this.publish();
-		instance = this;
 	}
 	
 	private void publish() throws Exception {
 		// get all the handle information for the attributes
+		logger.info("Objetos publicados.");
 		this.entityHandle = this.rtiAmb.getObjectClassHandle("HLAobjectRoot.BaseEntity.PhysicalEntity.Platform.Aircraft");
 		this.entityTypeHandle = this.rtiAmb.getAttributeHandle(entityHandle, "EntityType");
 		this.spatialHandle = this.rtiAmb.getAttributeHandle(entityHandle, "Spatial");

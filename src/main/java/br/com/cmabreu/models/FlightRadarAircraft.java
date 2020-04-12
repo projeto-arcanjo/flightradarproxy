@@ -66,10 +66,11 @@ public class FlightRadarAircraft implements Serializable {
 					NETN-FOM.pdf 
 	*/
 	
-	public FlightRadarAircraft( ) throws Exception {
-		this.objectInstanceHandle = manager.getRtiAmb().registerObjectInstance( manager.getEntityHandle() );
+	public FlightRadarAircraft( FlightRadarAircraftManager manager ) throws Exception {
+		this.manager = manager;
+		
+		this.objectInstanceHandle = this.manager.getRtiAmb().registerObjectInstance( manager.getEntityHandle() );
 		this.encoderFactory = RtiFactoryFactory.getRtiFactory().getEncoderFactory(); 
-		this.manager = FlightRadarAircraftManager.getInstance();
 		this.identificador = "PROVIDENCIAR UM ID";
 		this.env = new Environment();
 		this.codec = new Codec( this.encoderFactory );

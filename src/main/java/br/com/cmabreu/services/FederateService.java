@@ -3,6 +3,10 @@ package br.com.cmabreu.services;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
 
@@ -33,8 +37,10 @@ public class FederateService {
 	private FederateAmbassador fedamb;  			
 	private Logger logger = LoggerFactory.getLogger( FederateService.class );
 	private EncoderDecoder encoder;	
-	private Runnable udpServerThread;
+	private Runnable frCollectorThread;
 	private Runnable federateExecutorThread;
+	private ScheduledFuture<?> scheduled;
+	private ScheduledExecutorService scheduler;
 	
     @Value("${federation.fomfolder}")
     String fomFolder;	
@@ -45,18 +51,20 @@ public class FederateService {
     @Value("${federation.federateName}")
     String federateName;	
 
-    @Value("${udpserver.port}")
-    Integer udpServerPort; 
+    @Value("${frcollector.firstrun}")
+    Integer frFirstRun; 
     
-	@PreDestroy
+    @Value("${frcollector.interval}")
+    Integer frInterval; 
+
+    
+    @PreDestroy
 	public void onExit() {
 		logger.info("Encerando Federado...");
 		this.quit();
 	}
     
     public void startRti() throws Exception {
-    	// O Manager precisa ser assim para que possa ser acessado pelo UDPServerThread 
-    	// ( ele nao tem o RTIAmbassador que eh necessario para instanciar o Manager )
     	
     	if( !fomFolder.endsWith("/") ) fomFolder = fomFolder + "/";
     	
@@ -77,7 +85,9 @@ public class FederateService {
 		joinFederation( federationName, federateName);
 		
 
-		
+		///////////////////////////////
+		// 5. Inicia o Gerenciador //
+		///////////////////////////////	
 		FlightRadarAircraftManager.startInstance( rtiamb );
 		
 		//////////////////////////////
@@ -98,9 +108,10 @@ public class FederateService {
 		
 		
     	// Inicia o coletor FlightRadar24
-    	this.udpServerThread = new FlightRadarCollectorThread( );
-    	new Thread( this.udpServerThread ).start(); 
-		
+		this.scheduler = Executors.newSingleThreadScheduledExecutor();
+		this.frCollectorThread = new FlightRadarCollectorThread( );
+        this.scheduled =  this.scheduler.scheduleAtFixedRate( this.frCollectorThread, this.frFirstRun, this.frInterval , TimeUnit.SECONDS );
+				
     }
 
     
@@ -120,7 +131,8 @@ public class FederateService {
     public void quit()  {
 	
     	( (FederateExecutorThread)this.federateExecutorThread ).finish();
-    	( (FlightRadarCollectorThread)this.udpServerThread ).finish();
+    	( (FlightRadarCollectorThread)this.frCollectorThread ).finish();
+    	this.scheduled.cancel( false );
     	
     	
 		////////////////////////////////////
