@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import br.com.cmabreu.models.FlightRadarAircraft;
 import br.com.cmabreu.services.FlightRadarAircraftManager;
 
 /*
@@ -85,21 +84,7 @@ public class FlightRadarCollectorThread implements Runnable {
                 
                 Object oo = json.get( pair );
                 if ( oo instanceof JSONArray ) {
-                	
-                	JSONArray frAircraft = (JSONArray)oo;
-                	String arID = frAircraft.getString(0);
-                	double lon = frAircraft.getDouble(1);
-                	double lat = frAircraft.getDouble(2);
-                	double alt = frAircraft.getDouble(4) * 0.3048;
-                	double heading = frAircraft.getDouble(3);
-                	
-            		// Para cada aeronave encontrada
-            		FlightRadarAircraft ac = new FlightRadarAircraft( manager );
-            		// Preenche os atributos da aeronave com os dados do FlightRadar24
-            		// O numero do voo identifica unicamente uma aeronave
-            		// Envia as atualizacoes para a RTI
-            		ac.sendSpatialVariant();
-
+                	manager.updateAircraft( (JSONArray)oo );
                 	count++;	
                 	
                 }

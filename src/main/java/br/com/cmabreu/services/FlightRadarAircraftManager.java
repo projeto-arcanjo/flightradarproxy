@@ -1,7 +1,9 @@
 package br.com.cmabreu.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,17 +20,25 @@ public class FlightRadarAircraftManager {
 	private InteractionClassHandle interactionHandle;   
 
 	// caches of handle types - set once we join a federation
-	protected AttributeHandleSet attributes;
-	protected ObjectClassHandle entityHandle;
-	protected AttributeHandle entityTypeHandle;
-	protected AttributeHandle spatialHandle;
-	protected AttributeHandle forceIdentifierHandle;
-	protected AttributeHandle markingHandle;	
-	protected AttributeHandle isConcealedHandle;
-	protected AttributeHandle entityIdentifierHandle;
-	protected AttributeHandle damageStateHandle;
-	
+	private AttributeHandleSet attributes;
+	private ObjectClassHandle entityHandle;
+	private AttributeHandle entityTypeHandle;
+	private AttributeHandle spatialHandle;
+	private AttributeHandle forceIdentifierHandle;
+	private AttributeHandle markingHandle;	
+	private AttributeHandle isConcealedHandle;
+	private AttributeHandle entityIdentifierHandle;
+	private AttributeHandle damageStateHandle;
 	private static FlightRadarAircraftManager instance;
+	private List<FlightRadarAircraft> aircrafts;
+	
+	private FlightRadarAircraft exists( String id ) {
+		for( FlightRadarAircraft ac : this.aircrafts ) {
+			if( ac.getIdentificador().equals(id) ) return ac;
+		}
+		return null;
+	}
+	
 	private Logger logger = LoggerFactory.getLogger( FlightRadarAircraftManager.class );
 	
 	public static FlightRadarAircraftManager getInstance() {
@@ -40,6 +50,7 @@ public class FlightRadarAircraftManager {
 	}
 	
 	private FlightRadarAircraftManager( RTIambassador rtiAmb ) throws Exception {
+		this.aircrafts = new ArrayList<FlightRadarAircraft>();
 		logger.info("FlightRadar Aircraft Manager ativo");
 		this.rtiAmb = rtiAmb;
 		this.publish();
@@ -130,5 +141,36 @@ public class FlightRadarAircraftManager {
 		return null;
 	}
 	
+	public void updateAircraft( JSONArray aircraftJsonData ) throws Exception {
+    	// ["E49590",-12.39,-38.28,35,39025,470,"4502","F-SBSV5","A20N","PR-YSD",1586829614,"VCP","REC","AD2202",0,0,"AZU2202",0,"AZU"]
+    	
+		
+    	String arID = aircraftJsonData.getString(0);
+    	double lon = aircraftJsonData.getDouble(1);
+    	double lat = aircraftJsonData.getDouble(2);
+    	double heading = aircraftJsonData.getDouble(3);
+    	double alt = aircraftJsonData.getDouble(4) * 0.3048 ;
+    	
+    	// Verifica se já tenho esta aeronave
+    	FlightRadarAircraft ac = this.exists( arID );
+    	if( ac == null ) {
+    		// se não tiver eu crio na minha lista
+    		ac = new FlightRadarAircraft( this, arID );
+    		this.aircrafts.add( ac );
+    	} else {
+    		//
+    	}
+
+		// Preenche os atributos da aeronave com os dados do FlightRadar24
+		// O numero do voo identifica unicamente uma aeronave
+		// Envia as atualizacoes para a RTI
+		ac.setAltitude( alt );
+		ac.setLongitude( lon );
+		ac.setLatitude( lat );
+		ac.setOrientationPhi( heading );
+		
+		// Manda a atualizacao para a RTI
+		ac.sendSpatialVariant();
+	}
 	
 }
