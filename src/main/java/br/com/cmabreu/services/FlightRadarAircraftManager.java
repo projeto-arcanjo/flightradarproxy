@@ -135,27 +135,13 @@ public class FlightRadarAircraftManager {
 		}
 	}
 
-	public FlightRadarAircraft updateTest(String identificador, float lat, float lon, float alt, float head, float pitch, float roll) {
-		// Esse update vem do frontend pelo Controller
-		// Foi criado para efeito de testes
-		return null;
-	}
-	
-	public void updateAircraft( JSONArray aircraftJsonData ) throws Exception {
-    	// ["E49590",-12.39,-38.28,35,39025,470,"4502","F-SBSV5","A20N","PR-YSD",1586829614,"VCP","REC","AD2202",0,0,"AZU2202",0,"AZU"]
-    	
+	public FlightRadarAircraft update(String identificador, float lat, float lon, float alt, float head, float pitch, float roll) throws Exception {
 		
-    	String arID = aircraftJsonData.getString(0);
-    	double lon = aircraftJsonData.getDouble(1);
-    	double lat = aircraftJsonData.getDouble(2);
-    	double heading = aircraftJsonData.getDouble(3);
-    	double alt = aircraftJsonData.getDouble(4) * 0.3048 ;
-    	
     	// Verifica se já tenho esta aeronave
-    	FlightRadarAircraft ac = this.exists( arID );
+    	FlightRadarAircraft ac = this.exists( identificador );
     	if( ac == null ) {
     		// se não tiver eu crio na minha lista
-    		ac = new FlightRadarAircraft( this, arID );
+    		ac = new FlightRadarAircraft( this, identificador );
     		this.aircrafts.add( ac );
     	} else {
     		//
@@ -164,13 +150,28 @@ public class FlightRadarAircraftManager {
 		// Preenche os atributos da aeronave com os dados do FlightRadar24
 		// O numero do voo identifica unicamente uma aeronave
 		// Envia as atualizacoes para a RTI
-		ac.setAltitude( alt );
-		ac.setLongitude( lon );
-		ac.setLatitude( lat );
-		ac.setOrientationPhi( heading );
+		ac.setAltitude( (float)alt );
+		ac.setLongitude( (float)lon );
+		ac.setLatitude( (float)lat );
+		ac.setOrientationPhi( (float)head );
 		
 		// Manda a atualizacao para a RTI
-		ac.sendSpatialVariant();
+		ac.sendSpatialVariant();		
+		
+		return ac;
+	}
+	
+	public void updateAircraft( JSONArray aircraftJsonData ) throws Exception {
+    	// ["E49590",-12.39,-38.28,35,39025,470,"4502","F-SBSV5","A20N","PR-YSD",1586829614,"VCP","REC","AD2202",0,0,"AZU2202",0,"AZU"]
+    	
+    	String arID = aircraftJsonData.getString(0);
+    	double lat = aircraftJsonData.getDouble(1);
+    	double lon = aircraftJsonData.getDouble(2);
+    	double heading = aircraftJsonData.getDouble(3);
+    	double alt = aircraftJsonData.getDouble(4) * 0.3048 ;
+    	double speed = aircraftJsonData.getDouble(5);
+
+    	this.update(arID, (float)lat, (float)lon, (float)alt, (float)heading, 0, 0);
 	}
 	
 }

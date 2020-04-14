@@ -106,14 +106,16 @@ public class FederateService {
 		this.federateExecutorThread = new FederateExecutorThread( this );
 		new Thread( this.federateExecutorThread ).start();
 		
-		
-    	// Inicia o coletor FlightRadar24
+    }
+
+
+	// Inicia o coletor FlightRadar24
+	// Acionado somente pelo Controller REST
+    public void startCollector() {
 		this.scheduler = Executors.newSingleThreadScheduledExecutor();
 		this.frCollectorThread = new FlightRadarCollectorThread( );
         this.scheduled =  this.scheduler.scheduleAtFixedRate( this.frCollectorThread, this.frFirstRun, this.frInterval , TimeUnit.SECONDS );
-				
     }
-
     
     public void evokeCallBacks() {
     	try {
@@ -253,8 +255,8 @@ public class FederateService {
 		
 	}
 
-	public FlightRadarAircraft update( String identificador, float lat, float lon, float alt, float head, float pitch, float roll ) {
-		return FlightRadarAircraftManager.getInstance().updateTest( identificador, lat, lon, alt, head, pitch, roll);
+	public FlightRadarAircraft update( String identificador, float lat, float lon, float alt, float head, float pitch, float roll ) throws Exception {
+		return FlightRadarAircraftManager.getInstance().update( identificador, lat, lon, alt, head, pitch, roll);
 	}
 	
 	

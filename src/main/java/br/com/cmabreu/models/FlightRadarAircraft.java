@@ -45,14 +45,14 @@ public class FlightRadarAircraft implements Serializable {
 	private float velocityY;
 	private float velocityZ;
 	
-	private double orientationPsi;
-	private double orientationTheta;
-	private double orientationPhi;
+	private float orientationPsi;
+	private float orientationTheta;
+	private float orientationPhi;
 	
 	
-	private double latitude;
-	private double longitude;
-	private double altitude;
+	private float latitude;
+	private float longitude;
+	private float altitude;
 	private String identificador;
 	private Logger logger = LoggerFactory.getLogger( FlightRadarAircraft.class );
 	
@@ -100,18 +100,16 @@ public class FlightRadarAircraft implements Serializable {
 		this.spatialVariant = new SpatialVariant();
 		this.forceIdentifier = new ForceIdentifier( (byte)ForceID.NEUTRAL.value );
 		this.marking = new Marking( this.identificador );
-		this.latitude = -23.0946534902203;
-		this.longitude = -45.108200517635815;
-		this.altitude = 1001.0;
+		this.latitude = (float)-23.0;
+		this.longitude = (float)-45.0;
+		this.altitude = (float)0.0;
 		this.isConcealed = (byte)0;
-		this.velocityX = (float) 0.5415523;
-		this.velocityY = (float) -0.5452158;
-		this.velocityZ = (float) -1.1100446;
+		this.velocityX = (float) 0.0;
+		this.velocityY = (float) 0.0;
+		this.velocityZ = (float) 0.0;
 		this.orientationPhi = (float)0.0;
 		this.orientationTheta = (float)0.0;
 		this.orientationPsi = (float)0.0;
-		
-		// Pagina 53
 		this.damageState = (byte)DamageState.NO_DAMAGE.getValue();
 		
 		
@@ -132,7 +130,7 @@ public class FlightRadarAircraft implements Serializable {
 		
 		double[] geocentric = env.getGeocentricLocation(geodetic);
 		this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
-		this.spatialVariant.setOrientation( (float)this.orientationPsi, (float)this.orientationTheta, (float)this.orientationPhi );
+		this.spatialVariant.setOrientation( this.orientationPsi, this.orientationTheta, this.orientationPhi );
 		this.spatialVariant.setFrozen(false);
 		this.spatialVariant.setVelocityVector( this.velocityX, this.velocityY, this.velocityZ );
 		this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
@@ -229,7 +227,7 @@ public class FlightRadarAircraft implements Serializable {
 		return latitude;
 	}
 
-	public void setLatitude(double latitude) {
+	public void setLatitude(float latitude) {
 		this.latitude = latitude;
 	}
 
@@ -237,7 +235,7 @@ public class FlightRadarAircraft implements Serializable {
 		return longitude;
 	}
 
-	public void setLongitude(double longitude) {
+	public void setLongitude(float longitude) {
 		this.longitude = longitude;
 	}
 
@@ -245,7 +243,7 @@ public class FlightRadarAircraft implements Serializable {
 		return altitude;
 	}
 
-	public void setAltitude(double altitude) {
+	public void setAltitude(float altitude) {
 		this.altitude = altitude;
 	}
 
@@ -276,7 +274,7 @@ public class FlightRadarAircraft implements Serializable {
 			
 			double[] geocentric = env.getGeocentricLocation(geodetic);
 			this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
-			this.spatialVariant.setOrientation( (float)this.orientationPsi, (float)this.orientationTheta, (float)this.orientationPhi );
+			this.spatialVariant.setOrientation( this.orientationPsi, this.orientationTheta, this.orientationPhi );
 			this.spatialVariant.setFrozen(false);
 			this.spatialVariant.setVelocityVector( this.velocityX, this.velocityY, this.velocityZ );
 			this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
@@ -297,7 +295,7 @@ public class FlightRadarAircraft implements Serializable {
 	}
 
 
-	public void setOrientationPsi(double orientationPsi) {
+	public void setOrientationPsi(float orientationPsi) {
 		this.orientationPsi = orientationPsi;
 	}
 
@@ -307,7 +305,7 @@ public class FlightRadarAircraft implements Serializable {
 	}
 
 
-	public void setOrientationTheta(double orientationTheta) {
+	public void setOrientationTheta(float orientationTheta) {
 		this.orientationTheta = orientationTheta;
 	}
 
@@ -317,14 +315,14 @@ public class FlightRadarAircraft implements Serializable {
 	}
 
 
-	public void setOrientationPhi(double orientationPhi) {
+	public void setOrientationPhi(float orientationPhi) {
 		this.orientationPhi = orientationPhi;
 	}
 
 
 	// So para cumprir o metodo que vem do controller para testes
 	// Simula um pacote UDP de posicao (codigo 20) do X-Plane
-	public void updateTest(double lat, double lon, double alt, double head, double pitch, double roll) {
+	public void updateTest(float lat, float lon, float alt, float head, float pitch, float roll) {
 		this.latitude = lat;
 		this.longitude = lon;
 		this.altitude = alt;

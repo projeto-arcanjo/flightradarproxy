@@ -36,8 +36,8 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
  
 		ApiInfoBuilder apiInfoBuilder = new ApiInfoBuilder();
  
-		apiInfoBuilder.title("X-Plane Proxy");
-		apiInfoBuilder.description("Proxy HLA para o X-Plane");
+		apiInfoBuilder.title("FlightRadar24 Proxy");
+		apiInfoBuilder.description("Proxy HLA para o FlightRadar24");
 		apiInfoBuilder.version("1.0");
 		apiInfoBuilder.termsOfServiceUrl( "" );
 		apiInfoBuilder.license("Carlos Magno Abreu");

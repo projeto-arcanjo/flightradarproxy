@@ -26,7 +26,14 @@ public class FederateController {
     	return "ok";
 	}
 	
-	
+
+    @RequestMapping(value = "/start", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
+	public @ResponseBody String startCollector() {
+    	federateService.startCollector();
+    	return "ok";
+	}
+    
+    
 	@RequestMapping(value = "/deleteobjectinstance", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
 	public @ResponseBody String deleteObjectInstance( @RequestParam(value = "handle", required = true) Integer objectInstanceHandle ) {
 		try {
