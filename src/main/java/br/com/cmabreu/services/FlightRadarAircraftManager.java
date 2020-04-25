@@ -126,7 +126,9 @@ public class FlightRadarAircraftManager {
 	}
 
 	public FlightRadarAircraft spawn( String identificador ) throws Exception {
-		return null;
+		FlightRadarAircraft temp = new FlightRadarAircraft( this, identificador );
+		this.aircrafts.add( temp );
+		return temp;
 	}
 	
 	public void update( List<FlightRadarAircraft> aircrafts ) throws Exception {
