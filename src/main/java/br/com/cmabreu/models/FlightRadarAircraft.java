@@ -11,7 +11,6 @@ import br.com.cmabreu.codec.EntityType;
 import br.com.cmabreu.codec.ForceIdentifier;
 import br.com.cmabreu.codec.Marking;
 import br.com.cmabreu.codec.SpatialVariant;
-import br.com.cmabreu.misc.EncoderDecoder;
 import br.com.cmabreu.misc.Environment;
 import br.com.cmabreu.services.FlightRadarAircraftManager;
 import edu.nps.moves.disenum.CountryType;
@@ -56,6 +55,9 @@ public class FlightRadarAircraft implements Serializable {
 	private String identificador;
 	private Logger logger = LoggerFactory.getLogger( FlightRadarAircraft.class );
 	
+	public ObjectInstanceHandle getObjectInstanceHandle() {
+		return objectInstanceHandle;
+	}
 	
 	public boolean isMe( String identificador ) {
 		return identificador.equals( this.identificador );
@@ -111,13 +113,6 @@ public class FlightRadarAircraft implements Serializable {
 		this.orientationTheta = (float)0.0;
 		this.orientationPsi = (float)0.0;
 		this.damageState = (byte)DamageState.NO_DAMAGE.getValue();
-		
-		
-        updateAllValues();
-        
-        int handle = new EncoderDecoder().getObjectHandle(this.objectInstanceHandle  );
-        
-        logger.info("Nova aeronave '"+ identificador + "' [" + handle + "] pronta em " + latitude + "," + longitude + " " + altitude);
 	}
 	
 	public void updateAllValues() throws Exception {

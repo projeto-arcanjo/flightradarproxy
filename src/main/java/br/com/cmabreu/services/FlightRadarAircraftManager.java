@@ -12,6 +12,7 @@ import hla.rti1516e.AttributeHandle;
 import hla.rti1516e.AttributeHandleSet;
 import hla.rti1516e.InteractionClassHandle;
 import hla.rti1516e.ObjectClassHandle;
+import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RTIambassador;
 
 public class FlightRadarAircraftManager {
@@ -174,6 +175,16 @@ public class FlightRadarAircraftManager {
     	double speed = aircraftJsonData.getDouble(5);
 
     	this.update(arID, (float)lat, (float)lon, (float)alt, (float)heading, 0, 0);
+	}
+
+	public void provideAttributeValueUpdate(ObjectInstanceHandle theObject, AttributeHandleSet theAttributes) throws Exception {
+		List<FlightRadarAircraft> copyList = new ArrayList<FlightRadarAircraft>( aircrafts );
+		
+		for( FlightRadarAircraft aircraft : copyList ) {
+			if( aircraft.getObjectInstanceHandle().equals( theObject) ) aircraft.updateAllValues();
+		}
+		
+		copyList.clear();
 	}
 	
 }

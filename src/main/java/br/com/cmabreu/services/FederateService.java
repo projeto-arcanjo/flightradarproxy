@@ -17,10 +17,12 @@ import org.springframework.stereotype.Service;
 
 import br.com.cmabreu.FederateAmbassador;
 import br.com.cmabreu.FederateExecutorThread;
-import br.com.cmabreu.fr.FlightRadarCollectorThread;
 import br.com.cmabreu.misc.EncoderDecoder;
 import br.com.cmabreu.models.FlightRadarAircraft;
+import br.com.cmabreu.threads.FlightRadarCollectorThread;
+import hla.rti1516e.AttributeHandleSet;
 import hla.rti1516e.CallbackModel;
+import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RTIambassador;
 import hla.rti1516e.ResignAction;
 import hla.rti1516e.RtiFactoryFactory;
@@ -257,6 +259,18 @@ public class FederateService {
 
 	public FlightRadarAircraft update( String identificador, float lat, float lon, float alt, float head, float pitch, float roll ) throws Exception {
 		return FlightRadarAircraftManager.getInstance().update( identificador, lat, lon, alt, head, pitch, roll);
+	}
+
+	public void provideAttributeValueUpdate(ObjectInstanceHandle theObject, AttributeHandleSet theAttributes, byte[] userSuppliedTag) {
+
+		// A RTI esta pedindo meus atributos
+		try {
+			FlightRadarAircraftManager.getInstance().provideAttributeValueUpdate( theObject, theAttributes );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+		
+		
 	}
 	
 	

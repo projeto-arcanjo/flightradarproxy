@@ -1,4 +1,4 @@
-package br.com.cmabreu.fr;
+package br.com.cmabreu.threads;
 
 
 import java.util.Arrays;
@@ -69,8 +69,6 @@ public class FlightRadarCollectorThread implements Runnable {
     		return;
     	}
     	
-    	System.out.println("Coletando...");
-    	
     	try {
     		// Coleta dados da WEB.
     		// Acessa o FlightRadar e pega as aeronaves
@@ -81,7 +79,6 @@ public class FlightRadarCollectorThread implements Runnable {
             Iterator<String> itr1 = json.keys(); 
             while (itr1.hasNext()) { 
                 String pair = itr1.next();
-                
                 Object oo = json.get( pair );
                 if ( oo instanceof JSONArray ) {
                 	manager.updateAircraft( (JSONArray)oo );
@@ -89,8 +86,6 @@ public class FlightRadarCollectorThread implements Runnable {
                 	
                 }
             }         		
-    		
-    		logger.info( count + " aeronaves coletadas.");
     		
     	} catch( Exception se ) {
     		se.printStackTrace();
@@ -105,7 +100,7 @@ public class FlightRadarCollectorThread implements Runnable {
 	private String getAircrafts() {
 		RestTemplate restTemplate = new RestTemplate();
 		String responseBody;
-		String url = "https://data-live.flightradar24.com/zones/fcgi/feed.js?bounds=-10,-24,-45,-30&faa=1&mlat=1&flarm=1&adsb=1&gnd=0&air=1&vehicles=1&estimated=1&maxage=1000&gliders=1&stats=1";
+		String url = "https://data-live.flightradar24.com/zones/fcgi/feed.js?bounds=-10,-60,-30,-40&faa=1&mlat=1&flarm=1&adsb=1&gnd=0&air=1&vehicles=1&estimated=1&maxage=1000&gliders=1&stats=1";
 		try {
 			HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
