@@ -33,13 +33,6 @@ public class FlightRadarAircraftManager {
 	private static FlightRadarAircraftManager instance;
 	private List<FlightRadarAircraft> aircrafts;
 	
-	private FlightRadarAircraft exists( String id ) {
-		for( FlightRadarAircraft ac : this.aircrafts ) {
-			if( ac.getIdentificador().equals(id) ) return ac;
-		}
-		return null;
-	}
-	
 	private Logger logger = LoggerFactory.getLogger( FlightRadarAircraftManager.class );
 	
 	public static FlightRadarAircraftManager getInstance() {
@@ -138,43 +131,54 @@ public class FlightRadarAircraftManager {
 		}
 	}
 
-	public FlightRadarAircraft update(String identificador, float lat, float lon, float alt, float head, float pitch, float roll) throws Exception {
+	public synchronized FlightRadarAircraft sendToRTI(String identificador, float lat, float lon, float alt, float head, float pitch, float roll, float speed) throws Exception {
+		// Nao tentar otimizar!
+		// O objeto "ac" deve ser modificado dentro do loop para
+		// que o mesmo objeto da lista reflita as alteracoes
 		
     	// Verifica se já tenho esta aeronave
-    	FlightRadarAircraft ac = this.exists( identificador );
-    	if( ac == null ) {
-    		// se não tiver eu crio na minha lista
-    		ac = new FlightRadarAircraft( this, identificador );
-    		this.aircrafts.add( ac );
-    	} else {
-    		//
-    	}
-
-		// Preenche os atributos da aeronave com os dados do FlightRadar24
-		// O numero do voo identifica unicamente uma aeronave
-		// Envia as atualizacoes para a RTI
+		for( FlightRadarAircraft ac : this.aircrafts ) {
+			if( ac.getIdentificador().equals( identificador ) ) {
+				// Preenche os atributos da aeronave com os dados do FlightRadar24
+				// O numero do voo identifica unicamente uma aeronave
+				// Envia as atualizacoes para a RTI
+				ac.setAltitude( (float)alt );
+				ac.setLongitude( (float)lon );
+				ac.setLatitude( (float)lat );
+				ac.setOrientationPhi( (float)head );
+				ac.setVelocityX(speed);
+				// Manda a atualizacao para a RTI
+				ac.sendSpatialVariant();
+				return ac;
+			}
+		}
+		
+		// se não tiver eu crio na minha lista
+		FlightRadarAircraft ac = new FlightRadarAircraft( this, identificador );
 		ac.setAltitude( (float)alt );
 		ac.setLongitude( (float)lon );
 		ac.setLatitude( (float)lat );
 		ac.setOrientationPhi( (float)head );
-		
+		ac.setVelocityX(speed);
+		this.aircrafts.add( ac );
 		// Manda a atualizacao para a RTI
 		ac.sendSpatialVariant();		
-		
 		return ac;
 	}
 	
-	public void updateAircraft( JSONArray aircraftJsonData ) throws Exception {
+	public void sendAircraftToRTI( String keyName, JSONArray aircraftJsonData ) throws Exception {
     	// ["E49590",-12.39,-38.28,35,39025,470,"4502","F-SBSV5","A20N","PR-YSD",1586829614,"VCP","REC","AD2202",0,0,"AZU2202",0,"AZU"]
-    	
-    	String arID = aircraftJsonData.getString(0);
-    	double lat = aircraftJsonData.getDouble(1);
-    	double lon = aircraftJsonData.getDouble(2);
-    	double heading = aircraftJsonData.getDouble(3);
-    	double alt = aircraftJsonData.getDouble(4) * 0.3048 ;
-    	double speed = aircraftJsonData.getDouble(5);
-
-    	this.update(arID, (float)lat, (float)lon, (float)alt, (float)heading, 0, 0);
+		try {
+			String arID = keyName;//aircraftJsonData.getString(0);
+	    	double lat = aircraftJsonData.getDouble(1);
+	    	double lon = aircraftJsonData.getDouble(2);
+	    	double heading = aircraftJsonData.getDouble(3);
+	    	double alt = aircraftJsonData.getDouble(4) * 0.3048 ;
+	    	float speed = (float)aircraftJsonData.getDouble(5);
+	    	this.sendToRTI(arID, (float)lat, (float)lon, (float)alt, (float)heading, 0, 0, speed);
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
 	}
 
 	public void provideAttributeValueUpdate(ObjectInstanceHandle theObject, AttributeHandleSet theAttributes) throws Exception {

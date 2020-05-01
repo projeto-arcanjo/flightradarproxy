@@ -70,7 +70,6 @@ public class FlightRadarAircraft implements Serializable {
 	
 	public FlightRadarAircraft( FlightRadarAircraftManager manager, String identificador ) throws Exception {
 		this.manager = manager;
-		
 		this.objectInstanceHandle = this.manager.getRtiAmb().registerObjectInstance( manager.getEntityHandle() );
 		this.encoderFactory = RtiFactoryFactory.getRtiFactory().getEncoderFactory(); 
 		this.identificador = identificador;
@@ -115,6 +114,10 @@ public class FlightRadarAircraft implements Serializable {
 		this.damageState = (byte)DamageState.NO_DAMAGE.getValue();
 	}
 	
+	public void setVelocityX(float velocityX) {
+		this.velocityX = velocityX;
+	}
+	
 	public void updateAllValues() throws Exception {
 		
 		// Posicao
@@ -125,7 +128,9 @@ public class FlightRadarAircraft implements Serializable {
 		
 		double[] geocentric = env.getGeocentricLocation(geodetic);
 		this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
+		
 		this.spatialVariant.setOrientation( this.orientationPsi, this.orientationTheta, this.orientationPhi );
+		
 		this.spatialVariant.setFrozen(false);
 		this.spatialVariant.setVelocityVector( this.velocityX, this.velocityY, this.velocityZ );
 		this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
@@ -262,25 +267,25 @@ public class FlightRadarAircraft implements Serializable {
 	// Envia somente poscao e orientacao para a RTI
 	public void sendSpatialVariant() throws Exception {
 			
-			double[] geodetic = new double[3];
-			geodetic[ Environment.LAT ] = this.latitude;
-			geodetic[ Environment.LON ] = this.longitude;
-			geodetic[ Environment.ALT ] = this.altitude;		
-			
-			double[] geocentric = env.getGeocentricLocation(geodetic);
-			this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
-			this.spatialVariant.setOrientation( this.orientationPsi, this.orientationTheta, this.orientationPhi );
-			this.spatialVariant.setFrozen(false);
-			this.spatialVariant.setVelocityVector( this.velocityX, this.velocityY, this.velocityZ );
-			this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
-			byte[] encodedSpatialVariant = this.codec.encodeSpatialVariant( this.spatialVariant );
-			
-			// Cria o pacote de atributos
-			AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create(1);
-			ahvm.put( manager.getSpatialHandle(), encodedSpatialVariant);		
-			
-			// ENVIA O UPDATE PARA A RTI
-			manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );
+		double[] geodetic = new double[3];
+		geodetic[ Environment.LAT ] = this.latitude;
+		geodetic[ Environment.LON ] = this.longitude;
+		geodetic[ Environment.ALT ] = this.altitude;		
+		
+		double[] geocentric = env.getGeocentricLocation(geodetic);
+		this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
+		this.spatialVariant.setOrientation( this.orientationPsi, this.orientationTheta, this.orientationPhi );
+		this.spatialVariant.setFrozen(false);
+		this.spatialVariant.setVelocityVector( this.velocityX, this.velocityY, this.velocityZ );
+		this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
+		byte[] encodedSpatialVariant = this.codec.encodeSpatialVariant( this.spatialVariant );
+		
+		// Cria o pacote de atributos
+		AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create(1);
+		ahvm.put( manager.getSpatialHandle(), encodedSpatialVariant);		
+		
+		// ENVIA O UPDATE PARA A RTI
+		manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );
 	}
 
 	
@@ -314,17 +319,5 @@ public class FlightRadarAircraft implements Serializable {
 		this.orientationPhi = orientationPhi;
 	}
 
-
-	// So para cumprir o metodo que vem do controller para testes
-	// Simula um pacote UDP de posicao (codigo 20) do X-Plane
-	public void updateTest(float lat, float lon, float alt, float head, float pitch, float roll) {
-		this.latitude = lat;
-		this.longitude = lon;
-		this.altitude = alt;
-		this.orientationPsi = roll;
-		this.orientationTheta = pitch;		
-		this.orientationPhi = head;		
-	}
-	
 		
 }

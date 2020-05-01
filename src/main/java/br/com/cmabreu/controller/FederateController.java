@@ -2,6 +2,7 @@ package br.com.cmabreu.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -57,6 +58,22 @@ public class FederateController {
 	}
 
 
+	@RequestMapping(value = "/bbox/{minlat}/{minlon}/{maxlat}/{maxlon}", method = RequestMethod.GET )
+	public void bbox( @PathVariable("minlat") Float minLat,
+			@PathVariable("minlon") Float minLon,
+			@PathVariable("maxlat") Float maxLat,
+			@PathVariable("maxlon") Float maxLon) {
+		federateService.changeBBox(minLat, minLon, maxLat, maxLon);
+	}
+
+	
+	@RequestMapping(value = "/lastdata", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
+	public @ResponseBody String lastData( ) {
+		return federateService.getLastData();
+	}
+
+	
+	
 	@RequestMapping(value = "/update", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
 	public @ResponseBody FlightRadarAircraft update( @RequestParam(value = "identificador", required = true) String identificador,
 			@RequestParam(value = "lat", required = true) float lat,
@@ -64,9 +81,10 @@ public class FederateController {
 			@RequestParam(value = "alt", required = true) float alt,
 			@RequestParam(value = "head", required = true) float head, 
 			@RequestParam(value = "pitch", required = true) float pitch,
-			@RequestParam(value = "roll", required = true) float roll) {
+			@RequestParam(value = "roll", required = true) float roll,
+			@RequestParam(value = "speed", required = true) float speed) {
 		try {
-			FlightRadarAircraft aircraft = federateService.update( identificador, lat, lon, alt, head, pitch, roll );
+			FlightRadarAircraft aircraft = federateService.update( identificador, lat, lon, alt, head, pitch, roll, speed );
 			return aircraft;
 		} catch ( Exception e ) {
 			e.printStackTrace();

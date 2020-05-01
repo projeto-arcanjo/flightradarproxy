@@ -119,6 +119,15 @@ public class FederateService {
         this.scheduled =  this.scheduler.scheduleAtFixedRate( this.frCollectorThread, this.frFirstRun, this.frInterval , TimeUnit.SECONDS );
     }
     
+    
+    public String getLastData() {
+    	return ( (FlightRadarCollectorThread)this.frCollectorThread ).getLastData();
+    }
+    
+    public void changeBBox( float minLat, float minLon, float maxLat, float maxLon ) {
+    	( (FlightRadarCollectorThread)this.frCollectorThread ).changeBBox( minLat, minLon, maxLat, maxLon );
+    }
+    
     public void evokeCallBacks() {
     	try {
 			rtiamb.evokeMultipleCallbacks( 0.1, 0.2 );
@@ -243,7 +252,7 @@ public class FederateService {
 	}
 	
 	private byte[] generateTag() {
-		return ( "XPLANE_" + System.currentTimeMillis()).getBytes();
+		return ( "" + System.currentTimeMillis()).getBytes();
 	}	
 	
 	public void publish() throws Exception {
@@ -257,8 +266,8 @@ public class FederateService {
 		
 	}
 
-	public FlightRadarAircraft update( String identificador, float lat, float lon, float alt, float head, float pitch, float roll ) throws Exception {
-		return FlightRadarAircraftManager.getInstance().update( identificador, lat, lon, alt, head, pitch, roll);
+	public FlightRadarAircraft update( String identificador, float lat, float lon, float alt, float head, float pitch, float roll, float speed ) throws Exception {
+		return FlightRadarAircraftManager.getInstance().sendToRTI( identificador, lat, lon, alt, head, pitch, roll, speed);
 	}
 
 	public void provideAttributeValueUpdate(ObjectInstanceHandle theObject, AttributeHandleSet theAttributes, byte[] userSuppliedTag) {

@@ -49,15 +49,35 @@ import br.com.cmabreu.services.FlightRadarAircraftManager;
 */
 
 public class FlightRadarCollectorThread implements Runnable {
-    private boolean running;
+    private boolean running = false;
+    private boolean collecting = false;
 	private Logger logger = LoggerFactory.getLogger( FlightRadarCollectorThread.class );
 	private FlightRadarAircraftManager manager;
+
+	private float minLat = -21.78f;
+	private float minLon = -39.23f;
+	private float maxLat = -23.87f;
+	private float maxLon = -46.84f;	
+	
+	private String lastData;
 	
 	public void finish() {
 		this.running = false;
 	}
 	
-    public FlightRadarCollectorThread( ) {
+	public String getLastData() {
+		return lastData;
+	}
+	
+	public void changeBBox( float minLat, float minLon, float maxLat, float maxLon ) {
+		this.minLat = minLat;
+		this.minLon = minLon;
+		this.maxLat = maxLat;
+		this.maxLon = maxLon;
+		logger.info("Bounding Box atualizado para " + minLat + "," + minLon + "," + maxLat + "," + maxLon );
+	}
+	
+    public FlightRadarCollectorThread() {
     	logger.info("Coletor Iniciado");
     	this.running = true;
     	this.manager = FlightRadarAircraftManager.getInstance();
@@ -68,22 +88,27 @@ public class FlightRadarCollectorThread implements Runnable {
     	if( !this.running ) {
     		return;
     	}
+
+    	if( this.collecting ) {
+    		return;
+    	}
+    	
+    	this.collecting = true;
     	
     	try {
     		// Coleta dados da WEB.
     		// Acessa o FlightRadar e pega as aeronaves
-    		String aircrafts = getAircrafts();
-    		
-    		JSONObject json = new JSONObject( aircrafts );
-    		int count = 0;
+    		this.lastData = getAircrafts();
+    		JSONObject json = new JSONObject( this.lastData );
             Iterator<String> itr1 = json.keys(); 
             while (itr1.hasNext()) { 
-                String pair = itr1.next();
-                Object oo = json.get( pair );
-                if ( oo instanceof JSONArray ) {
-                	manager.updateAircraft( (JSONArray)oo );
-                	count++;	
-                	
+                String key = itr1.next();
+                Object oo = json.get( key );
+                try {
+                	if ( oo instanceof JSONArray ) manager.sendAircraftToRTI( key, (JSONArray)oo );
+                } catch ( Exception ee ) {
+                	// ignore. Garante que um erro em uma atualizacao
+                	// nao prejudicara todas
                 }
             }         		
     		
@@ -92,26 +117,25 @@ public class FlightRadarCollectorThread implements Runnable {
     		logger.error( se.getMessage() );
     	}
         	
-        
+    	this.collecting = false;
         
     }  
     
-
+/*
+    // https://data-live.flightradar24.com/zones/fcgi/feed.js?bounds=-21.78,-23.87,-46.84,-39.23&faa=1&mlat=1&flarm=1&adsb=1&gnd=1&air=1&vehicles=1&estimated=1&maxage=7200&gliders=1&stats=1
+*/
+    
 	private String getAircrafts() {
 		RestTemplate restTemplate = new RestTemplate();
 		String responseBody;
-		String url = "https://data-live.flightradar24.com/zones/fcgi/feed.js?bounds=-10,-60,-30,-40&faa=1&mlat=1&flarm=1&adsb=1&gnd=0&air=1&vehicles=1&estimated=1&maxage=1000&gliders=1&stats=1";
+		String url = "https://data-live.flightradar24.com/zones/fcgi/feed.js?bounds="+minLat+","+maxLat+","+maxLon+","+minLon+"&faa=1&mlat=1&flarm=1&adsb=1&gnd=1&air=1&vehicles=1&estimated=1&maxage=1000&gliders=1&stats=1";
 		try {
 			HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             headers.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
             HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-			
-			
             ResponseEntity<String> result = restTemplate.exchange( url , HttpMethod.GET, entity, String.class);
 			responseBody = result.getBody().toString();
-		
-			
 		} catch (HttpClientErrorException e) {
 		    responseBody = e.getResponseBodyAsString();
 		}	
