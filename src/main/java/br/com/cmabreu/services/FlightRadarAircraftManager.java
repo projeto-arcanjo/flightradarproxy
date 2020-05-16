@@ -136,16 +136,20 @@ public class FlightRadarAircraftManager {
 		// O objeto "ac" deve ser modificado dentro do loop para
 		// que o mesmo objeto da lista reflita as alteracoes
 		
+		logger.info(identificador + " " + lat + "," + lon + " ( alt=" + alt + ", head=" + head + " )" );
+		
     	// Verifica se já tenho esta aeronave
 		for( FlightRadarAircraft ac : this.aircrafts ) {
 			if( ac.getIdentificador().equals( identificador ) ) {
 				// Preenche os atributos da aeronave com os dados do FlightRadar24
 				// O numero do voo identifica unicamente uma aeronave
 				// Envia as atualizacoes para a RTI
-				ac.setAltitude( (float)alt );
-				ac.setLongitude( (float)lon );
-				ac.setLatitude( (float)lat );
-				ac.setOrientationPhi( (float)head );
+				ac.setAltitude( alt );
+				ac.setLongitude( lon );
+				ac.setLatitude( lat );
+				ac.setOrientationPsi( head );
+				ac.setOrientationTheta( pitch );
+				ac.setOrientationPhi( roll );
 				ac.setVelocityX(speed);
 				// Manda a atualizacao para a RTI
 				ac.sendSpatialVariant();
@@ -155,10 +159,12 @@ public class FlightRadarAircraftManager {
 		
 		// se não tiver eu crio na minha lista
 		FlightRadarAircraft ac = new FlightRadarAircraft( this, identificador );
-		ac.setAltitude( (float)alt );
-		ac.setLongitude( (float)lon );
-		ac.setLatitude( (float)lat );
-		ac.setOrientationPhi( (float)head );
+		ac.setAltitude( alt );
+		ac.setLongitude( lon );
+		ac.setLatitude( lat );
+		ac.setOrientationPsi( head );
+		ac.setOrientationTheta( pitch );
+		ac.setOrientationPhi( roll );
 		ac.setVelocityX(speed);
 		this.aircrafts.add( ac );
 		// Manda a atualizacao para a RTI

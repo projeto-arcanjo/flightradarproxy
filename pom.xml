@@ -131,6 +131,21 @@
 			<name>Spring Milestones</name>
 			<url>https://repo.spring.io/milestone</url>
 		</repository>
+		
+		<repository>
+			<id>portico-repo</id>
+			<name>PorticoRTI Repository</name>
+			<url>https://raw.githubusercontent.com/icemagno/portico-repo/master</url>
+			<releases>
+			    <enabled>true</enabled>
+			    <updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+			    <enabled>false</enabled>
+			</snapshots>
+		</repository>		
+		
+		
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>

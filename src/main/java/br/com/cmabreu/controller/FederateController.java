@@ -19,8 +19,6 @@ public class FederateController {
     private FederateService federateService;	
 	
 
-    // In original code the Federation was destroyed after the main loop.
-    // Now we must destroy it by calling this endpoint
     @RequestMapping(value = "/quit", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
 	public @ResponseBody String quit() {
     	federateService.quit();
@@ -29,8 +27,15 @@ public class FederateController {
 	
 
     @RequestMapping(value = "/start", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
-	public @ResponseBody String startCollector() {
-    	federateService.startCollector();
+	public @ResponseBody String startCollector( @RequestParam(value = "interval", required = false) Integer interval  ) {
+    	
+    	System.out.println( interval );
+    	
+    	if( interval != null ) {
+    		federateService.startCollector( interval );
+    	} else {
+    		federateService.startCollector();
+    	}
     	return "ok";
 	}
     

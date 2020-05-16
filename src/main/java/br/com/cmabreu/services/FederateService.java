@@ -26,7 +26,6 @@ import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RTIambassador;
 import hla.rti1516e.ResignAction;
 import hla.rti1516e.RtiFactoryFactory;
-import hla.rti1516e.exceptions.CallNotAllowedFromWithinCallback;
 import hla.rti1516e.exceptions.FederatesCurrentlyJoined;
 import hla.rti1516e.exceptions.FederationExecutionAlreadyExists;
 import hla.rti1516e.exceptions.FederationExecutionDoesNotExist;
@@ -114,10 +113,17 @@ public class FederateService {
 	// Inicia o coletor FlightRadar24
 	// Acionado somente pelo Controller REST
     public void startCollector() {
+    	this.doStartCollector( this.frInterval );
+    }
+    public void startCollector( int interval ) {
+    	this.doStartCollector( interval );
+    }
+    private void doStartCollector( int interval ) {
 		this.scheduler = Executors.newSingleThreadScheduledExecutor();
 		this.frCollectorThread = new FlightRadarCollectorThread( );
-        this.scheduled =  this.scheduler.scheduleAtFixedRate( this.frCollectorThread, this.frFirstRun, this.frInterval , TimeUnit.SECONDS );
+        this.scheduled =  this.scheduler.scheduleAtFixedRate( this.frCollectorThread, this.frFirstRun, interval , TimeUnit.SECONDS );
     }
+    // ***************************************************
     
     
     public String getLastData() {
@@ -128,18 +134,7 @@ public class FederateService {
     	( (FlightRadarCollectorThread)this.frCollectorThread ).changeBBox( minLat, minLon, maxLat, maxLon );
     }
     
-    public void evokeCallBacks() {
-    	try {
-			rtiamb.evokeMultipleCallbacks( 0.1, 0.2 );
-		} catch ( CallNotAllowedFromWithinCallback e ) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch ( RTIinternalError e ) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    }
-    
+  
 	// This now can be called by a REST endpoint. See FederateController.quit()
     public void quit()  {
 	
