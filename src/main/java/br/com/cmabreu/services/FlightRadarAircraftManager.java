@@ -125,18 +125,10 @@ public class FlightRadarAircraftManager {
 		return temp;
 	}
 	
-	public void update( List<FlightRadarAircraft> aircrafts ) throws Exception {
-		for( FlightRadarAircraft ac : aircrafts  ) {
-			ac.sendSpatialVariant();
-		}
-	}
-
-	public synchronized FlightRadarAircraft sendToRTI(String identificador, float lat, float lon, float alt, float head, float pitch, float roll, float speed) throws Exception {
+	public synchronized FlightRadarAircraft sendToRTI( String identificador, double lat, double lon, double alt, float head, float pitch, float roll, float speed) throws Exception {
 		// Nao tentar otimizar!
 		// O objeto "ac" deve ser modificado dentro do loop para
 		// que o mesmo objeto da lista reflita as alteracoes
-		
-		logger.info(identificador + " " + lat + "," + lon + " ( alt=" + alt + ", head=" + head + " )" );
 		
     	// Verifica se já tenho esta aeronave
 		for( FlightRadarAircraft ac : this.aircrafts ) {
@@ -180,8 +172,8 @@ public class FlightRadarAircraftManager {
 	    	double lon = aircraftJsonData.getDouble(2);
 	    	double heading = aircraftJsonData.getDouble(3);
 	    	double alt = aircraftJsonData.getDouble(4) * 0.3048 ;
-	    	float speed = (float)aircraftJsonData.getDouble(5);
-	    	this.sendToRTI(arID, (float)lat, (float)lon, (float)alt, (float)heading, 0, 0, speed);
+	    	double speed = aircraftJsonData.getDouble(5);
+	    	this.sendToRTI(arID, lat, lon, alt, (float)heading, 0f, 0f, (float)speed);
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
@@ -191,10 +183,14 @@ public class FlightRadarAircraftManager {
 		List<FlightRadarAircraft> copyList = new ArrayList<FlightRadarAircraft>( aircrafts );
 		
 		for( FlightRadarAircraft aircraft : copyList ) {
-			if( aircraft.getObjectInstanceHandle().equals( theObject) ) aircraft.updateAllValues();
+			if( aircraft.getObjectInstanceHandle().equals( theObject) ) {
+				aircraft.updateAllValues();
+				logger.info("A RTI solicitou os atributos de " + aircraft.getIdentificador() );
+				break;
+			}
 		}
-		
 		copyList.clear();
+
 	}
 	
 }

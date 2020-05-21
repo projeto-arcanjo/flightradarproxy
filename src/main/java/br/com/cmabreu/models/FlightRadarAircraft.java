@@ -49,9 +49,9 @@ public class FlightRadarAircraft implements Serializable {
 	private float orientationPhi;
 	
 	
-	private float latitude;
-	private float longitude;
-	private float altitude;
+	private double latitude;
+	private double longitude;
+	private double altitude;
 	private String identificador;
 	private Logger logger = LoggerFactory.getLogger( FlightRadarAircraft.class );
 	
@@ -101,9 +101,9 @@ public class FlightRadarAircraft implements Serializable {
 		this.spatialVariant = new SpatialVariant();
 		this.forceIdentifier = new ForceIdentifier( (byte)ForceID.NEUTRAL.value );
 		this.marking = new Marking( this.identificador );
-		this.latitude = (float)-23.0;
-		this.longitude = (float)-45.0;
-		this.altitude = (float)0.0;
+		this.latitude = -23.0;
+		this.longitude = -45.0;
+		this.altitude = 0.0;
 		this.isConcealed = (byte)0;
 		this.velocityX = (float) 0.0;
 		this.velocityY = (float) 0.0;
@@ -227,7 +227,7 @@ public class FlightRadarAircraft implements Serializable {
 		return latitude;
 	}
 
-	public void setLatitude(float latitude) {
+	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
 
@@ -235,7 +235,7 @@ public class FlightRadarAircraft implements Serializable {
 		return longitude;
 	}
 
-	public void setLongitude(float longitude) {
+	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
 
@@ -243,7 +243,7 @@ public class FlightRadarAircraft implements Serializable {
 		return altitude;
 	}
 
-	public void setAltitude(float altitude) {
+	public void setAltitude(double altitude) {
 		this.altitude = altitude;
 	}
 
@@ -265,27 +265,33 @@ public class FlightRadarAircraft implements Serializable {
 
 	
 	// Envia somente poscao e orientacao para a RTI
-	public void sendSpatialVariant() throws Exception {
+	public void sendSpatialVariant() {
+
+		logger.info(identificador + " " + this.latitude + "," + this.longitude + " ( alt=" + this.altitude + ", head=" + this.orientationPsi + " )" );
+
+		try {	
+			double[] geodetic = new double[3];
+			geodetic[ Environment.LAT ] = this.latitude;
+			geodetic[ Environment.LON ] = this.longitude;
+			geodetic[ Environment.ALT ] = this.altitude;		
 			
-		double[] geodetic = new double[3];
-		geodetic[ Environment.LAT ] = this.latitude;
-		geodetic[ Environment.LON ] = this.longitude;
-		geodetic[ Environment.ALT ] = this.altitude;		
-		
-		double[] geocentric = env.getGeocentricLocation(geodetic);
-		this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
-		this.spatialVariant.setOrientation( this.orientationPsi, this.orientationTheta, this.orientationPhi );
-		this.spatialVariant.setFrozen(false);
-		this.spatialVariant.setVelocityVector( this.velocityX, this.velocityY, this.velocityZ );
-		this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
-		byte[] encodedSpatialVariant = this.codec.encodeSpatialVariant( this.spatialVariant );
-		
-		// Cria o pacote de atributos
-		AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create(1);
-		ahvm.put( manager.getSpatialHandle(), encodedSpatialVariant);		
-		
-		// ENVIA O UPDATE PARA A RTI
-		manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );
+			double[] geocentric = env.getGeocentricLocation(geodetic);
+			this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
+			this.spatialVariant.setOrientation( this.orientationPsi, this.orientationTheta, this.orientationPhi );
+			this.spatialVariant.setFrozen(false);
+			this.spatialVariant.setVelocityVector( this.velocityX, this.velocityY, this.velocityZ );
+			this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
+			byte[] encodedSpatialVariant = this.codec.encodeSpatialVariant( this.spatialVariant );
+			
+			// Cria o pacote de atributos
+			AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create(1);
+			ahvm.put( manager.getSpatialHandle(), encodedSpatialVariant);		
+			
+			// ENVIA O UPDATE PARA A RTI
+			manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );
+		} catch ( Exception e) {
+			e.printStackTrace(); 
+		}
 	}
 
 	

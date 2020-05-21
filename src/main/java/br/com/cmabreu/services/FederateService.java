@@ -91,15 +91,6 @@ public class FederateService {
 		///////////////////////////////	
 		FlightRadarAircraftManager.startInstance( rtiamb );
 		
-		//////////////////////////////
-		// 8. publish               //
-		//////////////////////////////
-		// in this section we tell the RTI of all the data we are going to
-		// produce, and all the data we want to know about
-		publish();
-		logger.info( "Published" );		
-
-		
 		/////////////////////////////////////
 		// 10. do the main simulation loop //
 		/////////////////////////////////////
@@ -250,17 +241,13 @@ public class FederateService {
 		return ( "" + System.currentTimeMillis()).getBytes();
 	}	
 	
-	public void publish() throws Exception {
-		// Quem vai publicar uma aeronave eh o software X-Plane quando enviar dados.
-		// Até la, nada de aviao por aqui.
-	}
-
 	public FlightRadarAircraft spawn( String identificador ) throws Exception {
 		FlightRadarAircraft aircraft = FlightRadarAircraftManager.getInstance().spawn( identificador );
 		return aircraft;
 		
 	}
 
+	// Responde ao Controller
 	public FlightRadarAircraft update( String identificador, float lat, float lon, float alt, float head, float pitch, float roll, float speed ) throws Exception {
 		return FlightRadarAircraftManager.getInstance().sendToRTI( identificador, lat, lon, alt, head, pitch, roll, speed);
 	}
