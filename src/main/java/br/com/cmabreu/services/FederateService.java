@@ -12,6 +12,7 @@ import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -58,6 +59,11 @@ public class FederateService {
     @Value("${frcollector.interval}")
     Integer frInterval; 
 
+	@Value("${proxy.useProxy}")
+	private boolean useProxy;
+	
+    @Autowired
+    AuthService authService;	
     
     @PreDestroy
 	public void onExit() {
@@ -111,13 +117,14 @@ public class FederateService {
     }
     private void doStartCollector( int interval ) {
 		this.scheduler = Executors.newSingleThreadScheduledExecutor();
-		this.frCollectorThread = new FlightRadarCollectorThread( );
+		this.frCollectorThread = new FlightRadarCollectorThread( useProxy, authService );
         this.scheduled =  this.scheduler.scheduleAtFixedRate( this.frCollectorThread, this.frFirstRun, interval , TimeUnit.SECONDS );
     }
     // ***************************************************
     
     
     public String getLastData() {
+    	if( this.frCollectorThread == null ) return "Not Started";
     	return ( (FlightRadarCollectorThread)this.frCollectorThread ).getLastData();
     }
     

@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import br.com.cmabreu.services.AuthService;
 import br.com.cmabreu.services.FlightRadarAircraftManager;
 
 /*
@@ -60,6 +61,8 @@ public class FlightRadarCollectorThread implements Runnable {
 	private float maxLon = -46.84f;	
 	
 	private String lastData;
+	private boolean useProxy = false;
+	private AuthService authService;
 	
 	public void finish() {
 		this.running = false;
@@ -77,7 +80,9 @@ public class FlightRadarCollectorThread implements Runnable {
 		logger.info("Bounding Box atualizado para " + minLat + "," + minLon + "," + maxLat + "," + maxLon );
 	}
 	
-    public FlightRadarCollectorThread() {
+    public FlightRadarCollectorThread( boolean useProxy, AuthService authService ) {
+    	this.authService = authService;
+    	this.useProxy = useProxy;
     	logger.info("Coletor Iniciado");
     	this.running = true;
     	this.manager = FlightRadarAircraftManager.getInstance();
@@ -127,6 +132,9 @@ public class FlightRadarCollectorThread implements Runnable {
     
 	private String getAircrafts() {
 		RestTemplate restTemplate = new RestTemplate();
+		
+		if( useProxy ) restTemplate = new RestTemplate( authService.getFactory() );
+		
 		String responseBody;
 		String url = "https://data-live.flightradar24.com/zones/fcgi/feed.js?bounds="+minLat+","+maxLat+","+maxLon+","+minLon+"&faa=1&mlat=1&flarm=1&adsb=1&gnd=1&air=1&vehicles=1&estimated=1&maxage=1000&gliders=1&stats=1";
 		try {
